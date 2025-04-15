@@ -9,7 +9,8 @@
 
 This data science project investigates the interdependencies between major macroeconomic variables in Nigeria. It derives a custom productivity model from real-world financial indicators like money supply, inflation, exchange rates, and stock performance.
 
-![Project Overview](visuals/Fin report.jpg)
+![Project Overview](visuals/fin_report.jpg)
+
 
 ---
 
