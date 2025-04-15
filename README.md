@@ -103,7 +103,7 @@ This project builds a data-driven model to analyze Nigeria’s macroeconomic per
 
 ## 📬 Contact
 
-For collaboration or data access, please reach out via [GitHub Issues](https://github.com/gloriae24/Financial-Analysis-Nigerian-Economy/issues).
+For collaboration or data access, please reach out via [GitHub Issues](https://github.com/gloriae24/Financial-Analysis-Nigerian-Economy).
 📄 requirements.txt (sample content)
 pandas
 matplotlib
