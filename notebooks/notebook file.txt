@@ -1,0 +1,123 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load the dataset
+data = pd.read_csv('Nigerian_Data.csv')
+
+# Display the first few rows to verify the data
+print(data.head())
+
+# Ensure there are no leading/trailing whitespaces in column names
+data.columns = data.columns.str.strip()
+# Check if 'M1 SUPPLY' is in the columns
+if 'M1 SUPPLY' not in data.columns:
+    print("Column 'M1 SUPPLY' not found in the dataset. Available columns are:", data.columns)
+
+# Ensure the Date column is in datetime format
+data['Date'] = pd.to_datetime(data['Date'], format='%m/%d/%Y')
+
+# Convert all values in Stock Volume to strings first
+data['Stock Volume'] = data['Stock Volume'].astype(str)
+
+# Convert Stock Volume to proper numerical values
+def convert_volume(volume):
+    if 'M' in volume:
+        return float(volume.replace('M', '')) * 1e6
+    elif 'B' in volume:
+        return float(volume.replace('B', '')) * 1e9
+    else:
+        return float(volume)
+
+data['Stock Volume'] = data['Stock Volume'].apply(convert_volume)
+# List of columns to remove commas and convert to float
+numeric_columns = ['Stock Price', 'Stock Open', 'Stock High', 'Stock Low', 'M1 SUPPLY']
+for col in numeric_columns:
+    if col in data.columns:
+        data[col] = data[col].str.replace(',', '').astype(float)
+    else:
+        print(f"Skipping conversion of '{col}' as it is not present in the dataset.")
+
+# Convert percentage columns to float
+data['Change %'] = data['Change %'].str.replace('%', '').astype(float)
+
+# Convert other columns to appropriate data types
+data['Iinflation rates for All Items (12 Months Avg. Change)'] = data['Iinflation rates for All Items (12 Months Avg. Change)'].astype(float)
+data['Inflation rates for All Items (Year on Change)'] = data['Inflation rates for All Items (Year on Change)'].astype(float)
+data['real exchange rate open'] = data['real exchange rate open'].astype(float)
+data['real exchange rate close'] = data['real exchange rate close'].astype(float)
+
+# Handle missing values (fill with previous value or drop)
+data.fillna(method='ffill', inplace=True)
+
+# Set the Date column as the index
+data.set_index('Date', inplace=True)
+# Plot the variables
+plt.figure(figsize=(15, 10))
+
+# Plotting M1 Money Supply
+if 'M1 SUPPLY' in data.columns:
+    plt.subplot(2, 2, 1)
+    sns.lineplot(data=data, x=data.index, y='M1 SUPPLY')
+    plt.title('M1 Money Supply over Time')
+
+# Plotting Stock Volume
+plt.subplot(2, 2, 2)
+sns.lineplot(data=data, x=data.index, y='Stock Volume')
+plt.title('Stock Volume over Time')
+
+# Plotting Inflation Rate (12 Months Avg. Change)
+plt.subplot(2, 2, 3)
+sns.lineplot(data=data, x=data.index, y='Iinflation rates for All Items (12 Months Avg. Change)')
+plt.title('Inflation Rate (12 Months Avg. Change) over Time')
+
+# Plotting Real Exchange Rate (Open)
+plt.subplot(2, 2, 4)
+sns.lineplot(data=data, x=data.index, y='real exchange rate open')
+plt.title('Real Exchange Rate (Open) over Time')
+
+plt.tight_layout()
+plt.show()
+
+# Correlation Matrix
+correlation_matrix = data.corr()
+print(correlation_matrix)
+
+# Heatmap of the correlation matrix
+plt.figure(figsize=(10, 8))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
+plt.title('Correlation Matrix of Economic Variables')
+plt.show()
+
+# Define a productivity formula (Example)
+if 'M1 SUPPLY' in data.columns:
+    data['Productivity'] = data['M1 SUPPLY'] / (data['real exchange rate open'] * data['Iinflation rates for All Items (12 Months Avg. Change)'])
+
+    # Plotting Productivity
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(data=data, x=data.index, y='Productivity')
+    plt.title('Productivity over Time')
+    plt.xlabel('Date')
+    plt.ylabel('Productivity')
+    plt.show()
+# Example Baseline Calculation
+    baseline_productivity = data['M1 SUPPLY'].mean() / (data['real exchange rate open'].mean() * data['Iinflation rates for All Items (12 Months Avg. Change)'].mean())
+    print(f"Baseline Productivity: {baseline_productivity}")
+
+    # Example calculation for currency devaluation
+    data['Currency_Devaluation'] = data['real exchange rate close'] - data['real exchange rate open']
+
+    # Plotting Currency Devaluation
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(data=data, x=data.index, y='Currency_Devaluation')
+    plt.title('Currency Devaluation over Time')
+    plt.xlabel('Date')
+    plt.ylabel('Currency Devaluation')
+    plt.show()
+
+# Save the data to a new CSV file if needed
+# data.to_csv('Nigerian_Data_Processed.csv', index=True)
+# print("Data has been saved to 'Nigerian_Data_Processed.csv'")
+
+
